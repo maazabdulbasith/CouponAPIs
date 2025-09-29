@@ -1,8 +1,9 @@
 # coupons/views.py
-from decimal import Decimal
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from .models import Coupon
 from .serializers import CouponSerializer, ApplyCouponSerializer
 from . import services
@@ -15,11 +16,16 @@ from .exceptions import (
 )
 
 
-class CouponList(APIView):
-	def get(self, request):
-		coupons = Coupon.objects.all()
-		serializer = CouponSerializer(coupons, many=True)
-		return Response(serializer.data)
+class CouponPagination(PageNumberPagination):
+	page_size = 10
+	page_size_query_param = 'page_size'
+	max_page_size = 50
+
+
+class CouponListView(ListAPIView):
+	queryset = Coupon.objects.all()
+	serializer_class = CouponSerializer
+	pagination_class = CouponPagination
 
 
 class PreviewCouponView(APIView):
